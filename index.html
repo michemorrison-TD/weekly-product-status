@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Weekly Status at a Glance — Treasure AI</title>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    darkMode: 'class',
+  };
+</script>
+<style>
+  body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+  .line-clamp-1 { overflow: hidden; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; }
+</style>
+</head>
+<body class="bg-gray-50">
+
+<div id="root"></div>
+
+<script type="text/babel">
+const { useState } = React;
+
+const DATA = {
+  weekOf: "June 11–18, 2026",
+  releases: [
+    {
+      name: "SMS (M1)",
+      suite: "Engagement AI Suite",
+      quarter: "APR–JUN",
+      status: "IN FLIGHT",
+      scope: "First milestone of SMS channel activation via Twilio — happy path delivery, opt-in/opt-out sync, quiet hours (US). M1 target: July 1, 2026. M2 (click tracking, URL shortening): August 31, 2026. First customer: Sheetz.",
+      updatesThisWeek: "Weekly report issued 6/18 — Sprint 30 (6/17→6/30) is the final sprint before M1. Twilio Security Edition order form under final internal review; Security Edition org (SSO + HIPAA-eligible) to be activated shortly. M1 features nearly complete — demos held this week for Opt-in/out flow (6/11), Quiet Hours (6/15), OneOff Campaign (6/16), AlwaysOn Campaign + Quiet Hours (6/17), and full E2E M1 demo with PM (6/17). SMS successfully sent to a real phone number via one-off campaign. GTM enablement session (Engage SMS Enablement) scheduled for June 25 (EDT). Demo sales script drafted by product (Confluence). Short code purchase for testing under discussion — security org needed first. Quiet Hours spec clarified: resending blocked messages requires customer-run resend query (not CJO re-trigger). TRD (EGE-1550) complete. Monitoring setup and runbook preparation in progress.",
+      accomplishments: "Sprint 29 closed — all M1 BE implementation including QuietHours complete. E2E SMS delivery verified on Twilio test account. FE AlwaysOn Campaign + Quiet Hours implementation complete. TRD EGE-1550 done. Full E2E M1 demo conducted and recorded. GTM enablement session scheduled for 6/25. Sales demo script drafted. Twilio Security Edition order form submitted.",
+      pm: "John (Product), Takkanm (M1 Eng Lead), Inohiro (M2 Eng Lead)",
+      security: "In review",
+      legal: "Pending TCPA sub-processor classification (LG-529 — not a blocker for M1; required before M2 customer launch)",
+      privacy: "Complete",
+      risks: [
+        { risk: "Twilio Security Edition org not yet activated — contract start date 7/1, may slip M1 integration window", severity: "MEDIUM", remediation: "Dev account available as fallback for Sprint 30 testing; order form under final review, activation expected shortly" },
+        { risk: "Short code for testing not yet purchased — pending Security Edition org activation", severity: "MEDIUM", remediation: "Testing feasible with dev account long code; short code needed before GA customer launch" },
+        { risk: "LG-529 TCPA sub-processor classification not started", severity: "LOW", remediation: "Not a blocker for M1; Carlos/Costanza to review before M2 customer launch" }
+      ]
+    },
+    {
+      name: "Composable Audience in Engage Campaign",
+      suite: "Engagement AI Suite",
+      quarter: "APR–JUN",
+      status: "IN FLIGHT",
+      scope: "Allow composable audiences (BQ/Snowflake/Databricks) to be used directly in Engage campaign targeting. Also: CAS code merge-back into cdp-api for audit log/PBP support.",
+      updatesThisWeek: "Composable CJO (Customer Journey Orchestration) support in active development — FE implementation plan and ERD published (Confluence). Profile tab bug CAS-324 identified: CDP filters column list against real schema before querying but CAS passes FE columns straight into federated SQL, causing warehouse rejections on unknown columns. Fix sequencing agreed: CAS-358 merges first (safe, no regression), then CAS-324 as follow-up. Case-insensitive column matching proposed to handle CDW naming differences (BigQuery/Databricks lowercase vs Snowflake mixed). RT journey launch progress indicators need porting to composable UI (RT-1081). PBP config view: question raised about hiding unsupported journey permissions from composable users. New updated sales materials for Composable Audience Studio published on Treasure Trove (pitch deck, webpage, enablement links).",
+      accomplishments: "Composable CJO FE implementation plan published. CAS-358 merge sequencing agreed with QA. CAS-324 profile tab bug scoped and sequenced. Case-insensitive column matching solution defined. New Composable AS sales enablement materials live on Treasure Trove.",
+      pm: "TBD",
+      security: "In review (SECU-30441 — composable NPI review)",
+      legal: "Not started",
+      privacy: "In review",
+      risks: [
+        { risk: "CAS Profile tab broken (CAS-324) — column schema mismatch between CDP and CAS", severity: "MEDIUM", remediation: "CAS-358 merges first; CAS-324 follow-up fix in progress; no customer impact reported yet" },
+        { risk: "RT journey launch progress indicators not ported to composable UI (RT-1081)", severity: "MEDIUM", remediation: "CAS UI team investigating whether cas-ui calls realtime-api same way as standard audience studio" }
+      ]
+    },
+    {
+      name: "Paid Media AI Suite",
+      suite: "Engagement AI Suite",
+      quarter: "APR–JUN",
+      status: "IN FLIGHT",
+      scope: "AI-powered paid media suite — Meta CAPI integration, signal diagnosis, AI recommendations, Context Manager. Targeting Cannes Lions (June 16-20) as external showcase moment.",
+      updatesThisWeek: "Updated Paid Media demo shared 6/16 for Cannes prep — includes onboarding flow to personalized Command Center views, AI diagnosis + recommendations, signal diagnosis + optimization, Context Manager. Positive design feedback received. Demo prep active for Cannes. CAPI offline event tracking issue surfaced 6/15: engineering confirmed no event detail is stored in CAPI config, making offline vs online event identification impossible with current architecture. Team escalating to Meta for recommendations; PM rejected proxy approach. Yum Brands SBR scheduled 6/25 — 15-min Paid Media Suite demo requested. Databricks Summit (6/15-18) attended — observed similar ad-spend flow demo from DBX customer lake product. Google Ad Manager integration patterns published. Clarivoy customer request logged 6/18. PR discussions kicked off.",
+      accomplishments: "Cannes demo updated with onboarding flow, AI diagnosis, signal optimization, Context Manager. Databricks Summit attended with competitive intelligence gathered. GAM integration guide published. Yum Brands demo scheduled for 6/25 SBR.",
+      pm: "TBD",
+      security: "In review",
+      legal: "Complete",
+      privacy: "In review",
+      risks: [
+        { risk: "CAPI offline event tracking gap — no event type stored, offline vs online events indistinguishable", severity: "HIGH", remediation: "Escalating to Meta for architectural guidance; engineering needs to add event-type parameter to connector; timeline TBD" },
+        { risk: "Cannes demo quality dependent on real-time demo environment stability", severity: "MEDIUM", remediation: "Ad platform auto-connect built in for demo reliability; UX feedback being incorporated pre-event" }
+      ]
+    },
+    {
+      name: "Web Pop-up & Text Personalization",
+      suite: "Engagement AI Suite",
+      quarter: "APR–JUN",
+      status: "IN FLIGHT",
+      scope: "Real-time personalized web pop-ups and inline text replacement driven by RT 2.0 attributes",
+      updatesThisWeek: "Personalization Studio demo conducted for ASO (AppStore Optimization prospect) 6/11 — Vinay excited about next steps including architecture and use cases. Latest demo shared 6/12. Channel relatively quiet this week — primary activity in cross-team composable and RT channels.",
+      accomplishments: "ASO customer demo delivered 6/11. Vinay follow-up on architecture and use cases in progress.",
+      pm: "TBD",
+      security: "In review",
+      legal: "Complete",
+      privacy: "In review",
+      risks: [
+        { risk: "Ad blocker interference with snippet injection", severity: "LOW", remediation: "Document known blockers; offer server-side fallback path" }
+      ]
+    },
+    {
+      name: "Treasure AI Studio (Web + EMEA)",
+      suite: "Treasure AI Studio",
+      quarter: "APR–JUN",
+      status: "IN FLIGHT",
+      scope: "Treasure AI Studio web platform — agent chat, workspace, scheduling, skill catalog. EMEA region live at agent.eu01.treasure.ai. Idle session auto-logout security feature in development (ETA early August).",
+      updatesThisWeek: "R&D Town Hall shifted one week — new date July 1 (JP) / June 30 (elsewhere) due to leadership travel. Product Office Hours 6/11 recap: Release Notes automation (Claude Code skill), PLG Q&A, AI Signals ML product overview, iOS Push Delivery for Engage Studio, LINE Flex Message support. iOS Push Delivery and LINE Official Account setup now documented. JCB raised urgent security issue: auto-login (saved passwords) not captured in Premium Audit Logs, violating their infosec policy — proposed workarounds: session timeout config (1 day/few hours) as interim; idle-session-auto-logout feature ETA early August. Release Notes publishing process now automated via Claude Code skill — feeds into internal slide deck + Sales Guide. ZDR (Zero Data Retention) agreement with OpenAI confirmed for Agent Foundry use cases.",
+      accomplishments: "Product Office Hours held 6/11. iOS Push Delivery shipped and documented. LINE Flex Message support documented. Release Notes automation live via Claude Code skill. ZDR/OpenAI status confirmed for customer inquiries. Idle-session-auto-logout security feature ETA communicated to JCB (early August).",
+      pm: "TBD",
+      security: "Complete (GA cleared). Pen test: Q1 with NetSPI",
+      legal: "In review",
+      privacy: "In review",
+      risks: [
+        { risk: "JCB auto-login audit log gap — saved-password logins not captured in Premium Audit Logs, infosec/legal compliance concern", severity: "HIGH", remediation: "Interim: advise JCB to configure session timeout to 1 day. Permanent fix: idle-session-auto-logout feature ETA early August" },
+        { risk: "Treasure AI Studio access not policy-controllable — org-wide on feature flag", severity: "MEDIUM", remediation: "Policy-level access control not on roadmap yet; being tracked" }
+      ]
+    },
+    {
+      name: "Composable AS (BQ) — Internal",
+      suite: "Intelligent CDP",
+      quarter: "APR–JUN",
+      status: "INTERNAL",
+      scope: "BigQuery-backed composable audience store — internal dogfood, then demo-ready for customer presentations. Snowflake and Databricks grant docs published for external use.",
+      updatesThisWeek: "Sprint 29 closed, Sprint 30 kicked off 6/17. New Jira automation live: engineer creating a branch now auto-transitions Triage/Ready → In Progress. Bug report: Jira bug description template still has an override template conflicting with AI agent descriptions — request to disable filed in #tpm. Composable CJO support moving to active development phase (see Composable Audience in Engage entry). New Composable AS sales materials live on Treasure Trove.",
+      accomplishments: "Sprint 30 kicked off. Jira status-transition automation deployed. New Composable AS pitch deck and sales materials published externally.",
+      pm: "TBD",
+      security: "In review (SECU-30441)",
+      legal: "Not started",
+      privacy: "Not started",
+      risks: [
+        { risk: "BQ cost overrun if query patterns not enforced", severity: "HIGH", remediation: "Add query guardrails + cost alerts before any external exposure" },
+        { risk: "CAS Profile tab bug (CAS-324) — composable column schema mismatch", severity: "MEDIUM", remediation: "Fix sequenced after CAS-358; no external customer impact yet" }
+      ]
+    },
+    {
+      name: "PLG Experience Center",
+      suite: "Treasure AI Studio",
+      quarter: "APR–JUN",
+      status: "IN FLIGHT",
+      scope: "Self-serve PLG web experience built on Treasure AI Studio for lead generation — real product experience with user's own data. Conversation-based incentives, viral invitation loop, HubSpot sales integration. US launched ~June 8. Japan launch delayed.",
+      updatesThisWeek: "PLG US LAUNCHED ~June 8 — 8 user signups collected since launch (5 trackable through funnel). 1.5% conversion rate from treasure.ai homepage to signup page (340 visitors → 8 signups). Raw product usage data available in feature_usage.plg_metrics on TD account 7060. HubSpot lead scoring automation ready but data engineering task (user profile → HubSpot sync) delayed 1-2 weeks due to competing priorities. Japan PLG launch pushed back from 6/16 — new timeline pending (engineering release moved to 6/17 JST + added marketing/website requirements). Japan sales enablement stakeholder identification in progress. PLG Japan data transfer (JP → US region) under review. Demo request from Mars UK (Elbey Aliyev, Sales persona) received via PLG 6/18. EMEA loop video for upcoming event under development. Competitor domain exclusion from PLG signup in progress. Google Tag Manager setup discussed.",
+      accomplishments: "PLG US live with 8 signups. Product analytics funnel tracking operational. HubSpot lead scoring automation ready. Demo request received from Mars UK via PLG (first EMEA inbound). EMEA event loop video in development.",
+      pm: "Han Liu (accountable PM), Kristen Zhou (product launch & enablement)",
+      security: "In review",
+      legal: "In review",
+      privacy: "In review",
+      risks: [
+        { risk: "HubSpot user profile sync delayed 1-2 weeks — lead scoring results not flowing automatically", severity: "MEDIUM", remediation: "Manual HubSpot updates as interim; data engineering to complete sync task within 2 weeks" },
+        { risk: "Japan PLG launch delayed — new timeline not yet confirmed", severity: "MEDIUM", remediation: "Engineering release moved to 6/17 JST; marketing/website requirements being added; Japan sales enablement stakeholder needed" },
+        { risk: "Low top-of-funnel conversion (1.5%) — traffic not converting to signups at scale", severity: "MEDIUM", remediation: "Monitor traffic sources via GA4; competitor domain exclusion in progress; EMEA inbound confirms international interest" }
+      ]
+    },
+    {
+      name: "Sales Enablement & GTM Readiness",
+      suite: "Treasure AI Studio",
+      quarter: "APR–JUN",
+      status: "IN FLIGHT",
+      scope: "Sales enablement for Treasure AI rebrand and PLG launch — Databricks partnership announcement response, Cannes Lions presence, Yum Brands SBR, field enablement sessions.",
+      updatesThisWeek: "Databricks internal enablement session held 6/18 (8am PT) — recording and deck shared in #sales-enablement. Cannes Lions (6/16-20) active — Paid Media team attending, LinkedIn posts published, Microsoft event at Cannes explored for PLG tie-in. Engage adoption analysis shared by John: 40 accounts reviewed — 13 achieved 10K monthly sends (avg 3.8 months), 21 have not (avg 7.4 months elapsed). Top blockers: missing features (6 cos), deprioritized for other projects (4 cos). U-Next converting from SMC to Engage Studio (opt-out period ends, full contract likely). TOHO GAS surged to 1.8M email sends (+220% WoW). Q'SAI first large send (155K). Lorenzo building DNS setup check sheet to reduce onboarding friction. Engage DB data now on TD account 7060 for adoption tracking.",
+      accomplishments: "Databricks enablement session delivered. Cannes presence active. Engage adoption analysis (40 accounts) shared with leadership. U-Next converting from SMC. TOHO GAS/Q'SAI send volume surges noted. Engage DB data added to 7060 for product analytics.",
+      pm: "Kristen Zhou (launch & enablement), Dan Kent (GTM integration)",
+      security: "Not started",
+      legal: "Not started",
+      privacy: "Not started",
+      risks: [
+        { risk: "Engage adoption gap — 21 of 40 accounts not reaching 10K sends, avg 7.4 months stalled", severity: "MEDIUM", remediation: "Feature gaps being closed (Q2 roadmap); DNS onboarding friction addressed with check sheet; Engage DB on 7060 enables proactive tracking" },
+        { risk: "SDR team understaffed — may not support PLG scheduling at scale", severity: "MEDIUM", remediation: "Evaluate HubSpot/Calendly self-serve scheduling as fallback; revisit SDR allocation with Jason" }
+      ]
+    }
+  ],
+  bestPractices: [
+    { category: "Velocity Signal", icon: "⚡", item: "Track PRs merged / PRs open per release weekly — early warning for scope creep or slowdown" },
+    { category: "Dependency Map", icon: "🔗", item: "Call out cross-team blockers explicitly (e.g. RT 2.0 needed by both Personalization & Pop-up)" },
+    { category: "Customer Commitment Tracker", icon: "🤝", item: "Flag any release tied to a named customer or sales commit — these need exec visibility" },
+    { category: "Kill / Descope Log", icon: "✂️", item: "Track what was intentionally cut each week with the reason — prevents re-litigating decisions" },
+    { category: "Eng Capacity", icon: "👥", item: "Note any team member OOO, on-call, or context-switching — impacts velocity forecasting" },
+    { category: "Go-to-Market Readiness", icon: "🚀", item: "Docs, in-app messaging, CS enablement, and pricing/packaging should be in motion before code ships" },
+    { category: "Definition of Done", icon: "✅", item: "Each release needs explicit DoD agreed upfront: feature flags, rollout %, monitoring dashboards, rollback plan" },
+    { category: "Stakeholder Pulse", icon: "📣", item: "1 weekly async Loom or Slack update per release to keep Sales, CS, and Execs unblocked without meetings" }
+  ]
+};
+
+function App() {
+  const [activeTab, setActiveTab] = useState('releases');
+  const [expandedRelease, setExpandedRelease] = useState(null);
+  const [filterSuite, setFilterSuite] = useState('All');
+  const [dark, setDark] = useState(false);
+
+  const suites = ['All', ...Array.from(new Set(DATA.releases.map(r => r.suite)))];
+  const filtered = filterSuite === 'All' ? DATA.releases : DATA.releases.filter(r => r.suite === filterSuite);
+
+  const statusColors = {
+    'IN FLIGHT': 'bg-blue-100 text-blue-800',
+    'INTERNAL': 'bg-purple-100 text-purple-800',
+    'BETA': 'bg-yellow-100 text-yellow-800',
+    'GA': 'bg-green-100 text-green-800',
+    'AT RISK': 'bg-red-100 text-red-800',
+  };
+
+  const reviewColors = {
+    'Complete': 'bg-green-100 text-green-700',
+    'In review': 'bg-yellow-100 text-yellow-700',
+    'Not started': 'bg-gray-100 text-gray-500',
+    'Pending TCPA compliance sign-off': 'bg-orange-100 text-orange-700',
+  };
+
+  const riskBg = { HIGH: 'border-l-4 border-red-500 bg-red-50', MEDIUM: 'border-l-4 border-yellow-500 bg-yellow-50', LOW: 'border-l-4 border-green-500 bg-green-50' };
+  const riskBadge = { HIGH: 'bg-red-100 text-red-700', MEDIUM: 'bg-yellow-100 text-yellow-700', LOW: 'bg-green-100 text-green-700' };
+
+  const totalRisks = DATA.releases.flatMap(r => r.risks).length;
+  const highRisks = DATA.releases.flatMap(r => r.risks).filter(r => r.severity === 'HIGH').length;
+  const reviewsPending = DATA.releases.flatMap(r => [r.security, r.legal, r.privacy]).filter(s => s !== 'Complete').length;
+
+  return (
+    <div className={dark ? 'dark' : ''}>
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100">
+
+        {/* Header */}
+        <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 px-6 py-4">
+          <div className="max-w-7xl mx-auto flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-orange-400 to-pink-500 flex items-center justify-center text-white font-bold text-base">T</div>
+              <div>
+                <h1 className="text-lg font-bold tracking-tight">Weekly Status at a Glance</h1>
+                <p className="text-xs text-gray-400">Treasure AI · FY27 Q2 · Week of {DATA.weekOf}</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-5">
+              <div className="hidden sm:flex gap-5">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-blue-500">{DATA.releases.length}</div>
+                  <div className="text-xs text-gray-400">Releases in Flight</div>
+                </div>
+                <div className="w-px bg-gray-200 dark:bg-gray-700" />
+                <div className="text-center">
+                  <div className={`text-2xl font-bold ${highRisks > 0 ? 'text-red-500' : 'text-green-500'}`}>{highRisks}</div>
+                  <div className="text-xs text-gray-400">High Risks</div>
+                </div>
+                <div className="w-px bg-gray-200 dark:bg-gray-700" />
+                <div className="text-center">
+                  <div className={`text-2xl font-bold ${reviewsPending > 3 ? 'text-orange-500' : 'text-yellow-500'}`}>{reviewsPending}</div>
+                  <div className="text-xs text-gray-400">Reviews Pending</div>
+                </div>
+              </div>
+              <button
+                onClick={() => setDark(!dark)}
+                className="ml-4 text-xs px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+              >
+                {dark ? '☀️ Light' : '🌙 Dark'}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Tabs */}
+        <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 px-6">
+          <div className="max-w-7xl mx-auto flex gap-1">
+            {[
+              { id: 'releases', label: 'Releases in Flight', count: DATA.releases.length },
+              { id: 'risks', label: 'Risks', count: totalRisks },
+              { id: 'reviews', label: 'Security · Legal · Privacy' },
+              { id: 'bestpractices', label: 'Best Practices' },
+            ].map(tab => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
+                  activeTab === tab.id
+                    ? 'border-orange-500 text-orange-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-800 dark:hover:text-gray-200'
+                }`}
+              >
+                {tab.label}
+                {tab.count !== undefined && (
+                  <span className="ml-1.5 px-1.5 py-0.5 rounded-full text-xs bg-gray-100 dark:bg-gray-800 text-gray-500">{tab.count}</span>
+                )}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="p-6 max-w-7xl mx-auto">
+
+          {/* RELEASES */}
+          {activeTab === 'releases' && (
+            <div className="space-y-4">
+              <div className="flex gap-2 flex-wrap">
+                {suites.map(s => (
+                  <button key={s} onClick={() => setFilterSuite(s)}
+                    className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
+                      filterSuite === s ? 'bg-orange-500 text-white' : 'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:border-orange-400'
+                    }`}>
+                    {s}
+                  </button>
+                ))}
+              </div>
+              {filtered.map((release, i) => (
+                <div key={i} className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
+                  <button
+                    className="w-full text-left px-5 py-4 flex items-start justify-between hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                    onClick={() => setExpandedRelease(expandedRelease === i ? null : i)}
+                  >
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${statusColors[release.status]}`}>{release.status}</span>
+                        <span className="text-xs text-gray-400 bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded-full">{release.suite}</span>
+                        <span className="text-xs text-gray-400">{release.quarter}</span>
+                      </div>
+                      <h3 className="mt-1.5 text-base font-semibold">{release.name}</h3>
+                      <p className="mt-0.5 text-sm text-gray-500 line-clamp-1">{release.scope}</p>
+                    </div>
+                    <div className="ml-4 flex items-center gap-3 shrink-0">
+                      <div className="hidden sm:flex gap-1 text-xs">
+                        {[['S', release.security], ['L', release.legal], ['P', release.privacy]].map(([label, val]) => (
+                          <span key={label} title={`${label === 'S' ? 'Security' : label === 'L' ? 'Legal' : 'Privacy'}: ${val}`}
+                            className={`w-6 h-6 rounded-full flex items-center justify-center font-bold ${reviewColors[val] || reviewColors['Not started']}`}>
+                            {label}
+                          </span>
+                        ))}
+                      </div>
+                      {release.risks.some(r => r.severity === 'HIGH') && (
+                        <span className="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded-full font-medium">⚠ HIGH RISK</span>
+                      )}
+                      <span className="text-gray-400" style={{ display: 'inline-block', transform: expandedRelease === i ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}>▼</span>
+                    </div>
+                  </button>
+                  {expandedRelease === i && (
+                    <div className="border-t border-gray-100 dark:border-gray-800 px-5 py-4 grid grid-cols-1 md:grid-cols-2 gap-5">
+                      <div className="space-y-4">
+                        <div>
+                          <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">Complete Scope</div>
+                          <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">{release.scope}</p>
+                        </div>
+                        <div>
+                          <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">Updates This Week</div>
+                          <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">{release.updatesThisWeek}</p>
+                        </div>
+                        <div>
+                          <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">Accomplishments</div>
+                          <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">{release.accomplishments}</p>
+                        </div>
+                        <div>
+                          <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">PM Ownership</div>
+                          <div className="flex items-center gap-2">
+                            <div className="w-7 h-7 rounded-full bg-orange-100 flex items-center justify-center text-orange-600 text-xs font-bold">
+                              {release.pm === 'TBD' ? '?' : release.pm.split(' ').map(n => n[0]).join('')}
+                            </div>
+                            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{release.pm}</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="space-y-4">
+                        <div>
+                          <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Risks & Remediation</div>
+                          <div className="space-y-2">
+                            {release.risks.map((r, ri) => (
+                              <div key={ri} className={`p-3 rounded-lg ${riskBg[r.severity]}`}>
+                                <div className="flex items-start justify-between gap-2">
+                                  <span className="text-sm font-medium text-gray-800">{r.risk}</span>
+                                  <span className={`px-2 py-0.5 rounded-full text-xs font-bold shrink-0 ${riskBadge[r.severity]}`}>{r.severity}</span>
+                                </div>
+                                <div className="mt-1.5 text-xs text-gray-600">
+                                  <span className="font-semibold">Remediation:</span> {r.remediation}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                        <div>
+                          <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Review Status</div>
+                          <div className="grid grid-cols-3 gap-2">
+                            {[['Security', release.security], ['Legal', release.legal], ['Privacy', release.privacy]].map(([label, val]) => (
+                              <div key={label} className="rounded-lg border border-gray-100 dark:border-gray-700 p-2.5 text-center">
+                                <div className="text-xs text-gray-400 mb-1">{label}</div>
+                                <div className={`text-xs font-semibold px-1.5 py-0.5 rounded-full ${reviewColors[val] || reviewColors['Not started']}`}>{val}</div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* RISKS */}
+          {activeTab === 'risks' && (
+            <div className="space-y-3">
+              <div className="grid grid-cols-3 gap-4 mb-6">
+                {['HIGH', 'MEDIUM', 'LOW'].map(level => {
+                  const count = DATA.releases.flatMap(r => r.risks).filter(r => r.severity === level).length;
+                  const colors = { HIGH: 'border-red-200 bg-red-50 text-red-600', MEDIUM: 'border-yellow-200 bg-yellow-50 text-yellow-600', LOW: 'border-green-200 bg-green-50 text-green-600' };
+                  return (
+                    <div key={level} className={`rounded-xl p-4 border ${colors[level]}`}>
+                      <div className="text-3xl font-bold">{count}</div>
+                      <div className="text-sm text-gray-600 mt-0.5">{level} Severity</div>
+                    </div>
+                  );
+                })}
+              </div>
+              {['HIGH', 'MEDIUM', 'LOW'].flatMap(level =>
+                DATA.releases.flatMap(r =>
+                  r.risks.filter(ri => ri.severity === level).map((ri, i) => (
+                    <div key={`${level}-${r.name}-${i}`} className={`p-4 rounded-xl ${riskBg[level]}`}>
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${riskBadge[level]}`}>{level}</span>
+                            <span className="text-xs text-gray-500">{r.name}</span>
+                            <span className="text-xs text-gray-400">· {r.suite}</span>
+                          </div>
+                          <p className="text-sm font-semibold text-gray-800">{ri.risk}</p>
+                          <p className="text-sm text-gray-600 mt-1"><span className="font-medium">Remediation:</span> {ri.remediation}</p>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                )
+              )}
+            </div>
+          )}
+
+          {/* REVIEWS */}
+          {activeTab === 'reviews' && (
+            <div>
+              <div className="grid grid-cols-3 gap-4 mb-6">
+                {['Security', 'Legal', 'Privacy'].map(type => {
+                  const key = type.toLowerCase();
+                  const statuses = DATA.releases.map(r => r[key]);
+                  const complete = statuses.filter(s => s === 'Complete').length;
+                  const inReview = statuses.filter(s => s === 'In review').length;
+                  const notStarted = statuses.filter(s => !['Complete', 'In review'].includes(s)).length;
+                  return (
+                    <div key={type} className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-4">
+                      <div className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">{type} Reviews</div>
+                      <div className="space-y-2">
+                        <div className="flex justify-between items-center">
+                          <span className="text-xs text-gray-500">Complete</span>
+                          <span className="text-sm font-bold text-green-600">{complete}/{DATA.releases.length}</span>
+                        </div>
+                        <div className="w-full bg-gray-100 rounded-full h-2">
+                          <div className="bg-green-500 h-2 rounded-full" style={{ width: `${(complete / DATA.releases.length) * 100}%` }} />
+                        </div>
+                        <div className="flex gap-2 text-xs mt-2">
+                          <span className="bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-full">{inReview} in review</span>
+                          <span className="bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">{notStarted} pending</span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
+                <table className="w-full text-sm">
+                  <thead className="bg-gray-50 dark:bg-gray-800">
+                    <tr>
+                      {['Release', 'Suite', 'Security', 'Legal', 'Privacy'].map(h => (
+                        <th key={h} className={`px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider ${['Security','Legal','Privacy'].includes(h) ? 'text-center' : 'text-left'}`}>{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+                    {DATA.releases.map((r, i) => (
+                      <tr key={i} className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                        <td className="px-4 py-3 font-medium">{r.name}</td>
+                        <td className="px-4 py-3 text-xs text-gray-500">{r.suite}</td>
+                        {[r.security, r.legal, r.privacy].map((val, vi) => (
+                          <td key={vi} className="px-4 py-3 text-center">
+                            <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${reviewColors[val] || reviewColors['Not started']}`}>{val}</span>
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* BEST PRACTICES */}
+          {activeTab === 'bestpractices' && (
+            <div>
+              <div className="mb-4 p-4 rounded-xl bg-orange-50 border border-orange-200">
+                <p className="text-sm text-orange-800 font-medium">Best practices for a fast-moving team like Treasure AI — things your weekly status should actively track beyond the basics.</p>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {DATA.bestPractices.map((bp, i) => (
+                  <div key={i} className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-4">
+                    <div className="flex items-start gap-3">
+                      <span className="text-2xl">{bp.icon}</span>
+                      <div>
+                        <div className="text-sm font-semibold">{bp.category}</div>
+                        <div className="text-sm text-gray-600 dark:text-gray-400 mt-0.5 leading-relaxed">{bp.item}</div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+        </div>
+
+        {/* Footer */}
+        <div className="text-center py-6 text-xs text-gray-400">
+          Treasure AI · Weekly Status Dashboard · {DATA.weekOf} · Update data in the DATA object at top of file
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<App />);
+</script>
+</body>
+</html>
